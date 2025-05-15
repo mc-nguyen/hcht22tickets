@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <title>Bán Vé - Kết Quả & Hình ảnh</title>
+        <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+        <!-- Thay vì SDK v10+, dùng bản compat (giống cú pháp bạn đang viết) -->
+        <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+
+        <link rel="stylesheet" href="index.css"/>
+    </head>
+    <body>
+
+        <div class="form-container">
+            <h2>Tính Toán Bán Vé & Donation</h2>
+
+            
+            <label>Tên người bán:</label>
+            <input type="text" id="name" required>
+
+            <br/>
+            <label>Nhà thờ (địa điểm):</label>
+            <select id="location" required>
+                <option value="">-- Đang tải danh sách... --</option>
+            </select>
+            <br/>
+
+            <label>Ngày:</label>
+            <input type="date" id="date" required>
+
+            <label>Giờ lễ:</label>
+            <input type="time" id="time" required>
+
+            <label>Số vé trước khi bán:</label>
+            <input type="number" id="ticketsBefore" required>
+
+            <label>Số vé sau khi bán:</label>
+            <input type="number" id="ticketsAfter" required>
+
+            <label>Số tiền trước khi bán (đồng):</label>
+            <input type="number" id="moneyBefore" required>
+
+            <label>Số tiền sau khi bán (đồng):</label>
+            <input type="number" id="moneyAfter" required>
+
+            <button onclick="calculate()" id="calcBtn" disabled>Tính kết quả</button>
+
+            <div class="result" id="result" style="display: none;">
+                <h1>KẾT QUẢ</h1>
+                <p><strong>Tên người bán:</strong> <span id="r_name"></span></p>
+                <p><strong>Nhà thờ:</strong> <span id="r_location"></span></p>
+                <p><strong>Ngày:</strong> <span id="r_date"></span></p>
+                <p><strong>Giờ lễ:</strong> <span id="r_time"></span></p>
+                <hr>
+                <p><strong>Số vé đã bán:</strong> <span id="ticketsSold"></span></p>
+                <p><strong>Tiền lời từ vé:</strong> <span id="ticketRevenue"></span> đồng</p>
+                <p><strong>Tổng tiền thu được:</strong> <span id="totalMoney"></span> đồng</p>
+                <p><strong>Donation (tiền ủng hộ thêm):</strong> <span id="donation"></span> đồng</p>
+                <button id="downloadBtn" onclick="downloadImage()">Tải ảnh kết quả</button>
+            </div>
+        </div>
+
+        <script>
+            // 1. Firebase config (dán config riêng của bạn vào đây)
+            const firebaseConfig = {
+                apiKey: "AIzaSyA3O1M0nrrH4SQ4Sew9V0LZf2NBPGG2nOg",
+                authDomain: "banvehcht19.firebaseapp.com",
+                projectId: "banvehcht19",
+                storageBucket: "banvehcht19.appspot.com",
+                messagingSenderId: "771243862354",
+                appId: "1:771243862354:web:398af3230163696fa7f28b"
+            };
+
+            // 2. Khởi tạo Firebase & Firestore
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            function calculate() {
+                const pricePerTicket = 30;
+
+                const name = document.getElementById('name').value;
+                const location = document.getElementById('location').value;
+                const date = document.getElementById('date').value;
+                const time = document.getElementById('time').value;
+
+                const ticketsBefore = parseInt(document.getElementById('ticketsBefore').value) || 0;
+                const ticketsAfter = parseInt(document.getElementById('ticketsAfter').value) || 0;
+                const moneyBefore = parseInt(document.getElementById('moneyBefore').value) || 0;
+                const moneyAfter = parseInt(document.getElementById('moneyAfter').value) || 0;
+
+                const ticketsSold = ticketsBefore - ticketsAfter;
+                const ticketRevenue = ticketsSold * pricePerTicket;
+                const totalMoney = moneyAfter - moneyBefore;
+                const donation = totalMoney - ticketRevenue;
+
+                // Hiển thị kết quả
+                document.getElementById('r_name').innerText = name;
+                document.getElementById('r_location').innerText = location;
+                document.getElementById('r_date').innerText = date;
+                document.getElementById('r_time').innerText = time;
+                document.getElementById('ticketsSold').innerText = ticketsSold;
+                document.getElementById('ticketRevenue').innerText = ticketRevenue;
+                document.getElementById('totalMoney').innerText = totalMoney;
+                document.getElementById('donation').innerText = donation;
+                document.getElementById('result').style.display = 'block';
+
+                // 3. Lưu vào Firestore
+                db.collection("banve_records").add({
+                    name: name,
+                    location: location,
+                    date: date,
+                    time: time,
+                    ticketsBefore: ticketsBefore,
+                    ticketsAfter: ticketsAfter,
+                    ticketsSold: ticketsSold,
+                    ticketRevenue: ticketRevenue,
+                    moneyBefore: moneyBefore,
+                    moneyAfter: moneyAfter,
+                    totalMoney: totalMoney,
+                    donation: donation,
+                    timestamp: new Date()
+                })
+                .then(() => {
+                console.log("Ghi dữ liệu thành công lên Firestore");
+                })
+                .catch((error) => {
+                console.error("Lỗi khi ghi dữ liệu:", error);
+                });
+            }
+
+            db.collection("churches").get().then((querySnapshot) => {
+            const select = document.getElementById("location");
+            select.innerHTML = `<option value="">-- Chọn nhà thờ --</option>`; // reset mặc định
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const option = document.createElement("option");
+                option.value = data.fullName;
+                option.textContent = data.fullName;
+                select.appendChild(option);
+                });
+            }).catch((error) => {
+                console.error("Lỗi khi tải danh sách nhà thờ:", error);
+                document.getElementById("location").innerHTML = `<option value="">-- Lỗi tải dữ liệu --</option>`;
+            });
+
+            function downloadImage() {
+                const resultDiv = document.getElementById('result');
+
+                html2canvas(resultDiv).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'ket-qua-ban-ve.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            }
+
+            const inputs = document.querySelectorAll('input, select');
+            const calcBtn = document.getElementById('calcBtn');
+
+            function checkInputs() {
+            // Kiểm tra tất cả input/select có giá trị không rỗng
+            let allFilled = true;
+            inputs.forEach(input => {
+                if (!input.value) {
+                allFilled = false;
+                }
+            });
+            calcBtn.disabled = !allFilled; // bật/tắt nút
+            }
+
+            // Lắng nghe sự kiện input, change trên tất cả input/select
+            inputs.forEach(input => {
+                input.addEventListener('input', checkInputs);
+                input.addEventListener('change', checkInputs);
+            });
+
+            // Gọi kiểm tra ngay khi load trang để cập nhật trạng thái nút
+            checkInputs();
+        </script>
+
+    </body>
+</html>
