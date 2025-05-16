@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Quản lý Nhà Thờ</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="quanly_nhatho.css" />
+    <link rel="stylesheet" href="navbar.css" />
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Bán Vé</a></li>
+            <li><a href="quanly_nhatho.html">Quản lý Nhà thờ</a></li>
+            <li><a href="baocao.html">Báo cáo Doanh thu</a></li>
+        </ul>
+    </nav>
+
+    <div class="form-container">
+        <h1>Quản lý Nhà Thờ</h1>
+
+        <div class="form-group">
+            <label for="newLocation">Tên nhà thờ mới:</label>
+            <input type="text" id="newLocation" placeholder="Nhập tên nhà thờ" />
+        </div>
+
+        <button id="addLocationBtn">Thêm nhà thờ</button>
+
+        <h2 style="margin-top: 30px">Danh sách nhà thờ:</h2>
+        <ul id="locationList"></ul>
+    </div>
+
+    <script type="module">
+        // 1. Firebase config (dán config riêng của bạn vào đây)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3O1M0nrrH4SQ4Sew9V0LZf2NBPGG2nOg",
+            authDomain: "banvehcht19.firebaseapp.com",
+            projectId: "banvehcht19",
+            storageBucket: "banvehcht19.appspot.com",
+            messagingSenderId: "771243862354",
+            appId: "1:771243862354:web:398af3230163696fa7f28b"
+        };
+
+        // 2. Khởi tạo Firebase & Firestore
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const newLocationInput = document.getElementById('newLocation');
+        const addBtn = document.getElementById('addLocationBtn');
+        const locationList = document.getElementById('locationList');
+
+        async function loadLocations() {
+            locationList.innerHTML = '';
+            const snapshot = await db.collection('churches').get();
+            snapshot.forEach(doc => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <b>${doc.data().fullName}</b>
+                    <button onclick="deleteLocation('${doc.id}')">Xóa</button>
+                    `;
+                locationList.appendChild(li);
+            });
+        }
+
+        async function deleteLocation(id) {
+            if (confirm('Bạn có chắc muốn xóa không?')) {
+                await db.collection('churches').doc(id).delete();
+                loadLocations();
+            }
+        }
+
+        addBtn.addEventListener('click', async () => {
+            const name = newLocationInput.value.trim();
+            if (!name) return alert('Vui lòng nhập tên nhà thờ');
+            await db.collection('churches').add({ fullName: name });
+            newLocationInput.value = '';
+            loadLocations();
+        });
+
+        loadLocations();
+    </script>
+</body>
+
+</html>

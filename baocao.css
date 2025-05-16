@@ -1,0 +1,59 @@
+body {
+  background-color: #3b0a58; /* tím đậm */
+  font-family: sans-serif;
+  margin: 0;
+  padding: 20px;
+  color: white;
+}
+
+.report-container {
+  background-color: plum;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 60px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  overflow-x: auto;
+}
+
+h1 {
+  text-align: center;
+  color: white;
+  margin-top: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  color: black;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+thead th {
+  background-color: #5a189a;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+tbody td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+tfoot td {
+  background-color: plum;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+
+tr:hover {
+  background-color: #f3e9ff;
+}

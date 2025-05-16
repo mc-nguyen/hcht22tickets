@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Báo cáo Doanh thu</title>
+    <link rel="stylesheet" href="baocao.css" />
+    <link rel="stylesheet" href="navbar.css" />
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Bán Vé</a></li>
+            <li><a href="quanly_nhatho.html">Quản lý Nhà thờ</a></li>
+            <li><a href="baocao.html">Báo cáo Doanh thu</a></li>
+        </ul>
+    </nav>
+    <div class="report-container">
+        <h1>Báo cáo Doanh thu Bán Vé</h1>
+
+        <table id="reportTable" border="1" cellspacing="0" cellpadding="8"
+            style="width: 100%; background-color: white; color: black;">
+            <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Nhà thờ</th>
+                    <th>Ngày</th>
+                    <th>Giờ</th>
+                    <th>Vé bán</th>
+                    <th>Tiền lời</th>
+                    <th>Donation</th>
+                </tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+            <tfoot>
+                <tr style="font-weight: bold">
+                    <td colspan="4">Tổng</td>
+                    <td id="totalTickets">0</td>
+                    <td id="totalProfit">0</td>
+                    <td id="totalDonation">0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3O1M0nrrH4SQ4Sew9V0LZf2NBPGG2nOg",
+            authDomain: "banvehcht19.firebaseapp.com",
+            projectId: "banvehcht19",
+            storageBucket: "banvehcht19.appspot.com",
+            messagingSenderId: "771243862354",
+            appId: "1:771243862354:web:398af3230163696fa7f28b"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const TICKET_PRICE = 30;
+
+        async function loadReport() {
+            const snapshot = await db.collection('banve_records').get();
+            let totalTickets = 0, totalProfit = 0, totalDonation = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const sold = Number(data.ticketsSold);
+                const profit = Number(data.ticketRevenue);
+                const donation = Number(data.donation);
+
+                totalTickets += sold;
+                totalProfit += profit;
+                totalDonation += donation;
+
+                document.getElementById('reportBody').innerHTML += `
+                <tr>
+                    <td>${data.name}</td>
+                    <td>${data.location}</td>
+                    <td>${data.date}</td>
+                    <td>${data.time}</td>
+                    <td>${sold}</td>
+                    <td>${profit}</td>
+                    <td>${donation}</td>
+                </tr>
+                `;
+            });
+
+            document.getElementById('totalTickets').textContent = totalTickets;
+            document.getElementById('totalProfit').textContent = totalProfit;
+            document.getElementById('totalDonation').textContent = totalDonation;
+        }
+
+        loadReport();
+    </script>
+</body>
+
+</html>
