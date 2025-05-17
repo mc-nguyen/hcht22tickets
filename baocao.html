@@ -32,6 +32,7 @@
                     <th>Vé bán</th>
                     <th>Tiền lời</th>
                     <th>Donation</th>
+                    <th>Hành động</th> <!-- Thêm cột này -->
                 </tr>
             </thead>
             <tbody id="reportBody"></tbody>
@@ -83,6 +84,7 @@
                     <td>${sold}</td>
                     <td>${profit}</td>
                     <td>${donation}</td>
+                    <td><button onclick="deleteReport('${doc.id}')">Xoá</button></td>
                 </tr>
                 `;
             });
@@ -90,6 +92,19 @@
             document.getElementById('totalTickets').textContent = totalTickets;
             document.getElementById('totalProfit').textContent = totalProfit;
             document.getElementById('totalDonation').textContent = totalDonation;
+
+            
+        }
+
+        async function deleteReport(id) {
+            if (confirm("Bạn có chắc muốn xoá bản ghi này?")) 
+                db.collection("banve_records").doc(id).delete()
+                    .then(() => {
+                        console.log("Document deleted");
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting document: ", error);
+                    });
         }
 
         loadReport();
