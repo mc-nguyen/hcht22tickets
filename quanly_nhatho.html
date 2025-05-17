@@ -67,7 +67,7 @@
 
         async function deleteLocation(id) {
             if (confirm('Bạn có chắc muốn xóa không?')) {
-                await db.collection('churches').doc(id).delete();
+                db.collection('churches').doc(id).delete();
                 loadLocations();
             }
         }
