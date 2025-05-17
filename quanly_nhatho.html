@@ -52,19 +52,6 @@
         const addBtn = document.getElementById('addLocationBtn');
         const locationList = document.getElementById('locationList');
 
-        async function loadLocations() {
-            locationList.innerHTML = '';
-            const snapshot = await db.collection('churches').get();
-            snapshot.forEach(doc => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <b>${doc.data().fullName}</b>
-                    <button onclick="deleteLocation('${doc.id}')">Xóa</button>
-                    `;
-                locationList.appendChild(li);
-            });
-        }
-
         function deleteLocation(id) {
             if (confirm('Bạn có chắc muốn xóa không?')) {
                 db.collection('churches').doc(id).delete()
@@ -76,6 +63,19 @@
                     });;
                 loadLocations();
             }
+        }
+
+        async function loadLocations() {
+            locationList.innerHTML = '';
+            const snapshot = await db.collection('churches').get();
+            snapshot.forEach(doc => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <b>${doc.data().fullName}</b>
+                    <button onclick="deleteLocation('${doc.id}')">Xóa</button>
+                    `;
+                locationList.appendChild(li);
+            });
         }
 
         addBtn.addEventListener('click', async () => {
