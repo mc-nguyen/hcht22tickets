@@ -70,3 +70,28 @@ button {
 button:hover {
   background-color: darkred;
 }
+
+.tooltip-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.tooltip-box {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  white-space: pre-line;
+  display: none;
+  width: max-content;
+  max-width: 300px;
+}
+
+.tooltip-container:hover .tooltip-box {
+  display: block;
+}

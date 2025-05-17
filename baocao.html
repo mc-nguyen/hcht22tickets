@@ -77,27 +77,39 @@
 
                 document.getElementById('reportBody').innerHTML += `
                 <tr>
-                    <td>${data.name}</td>
+                    <td class="tooltip-container">
+                        ${data.name}
+                        <div class="tooltip-box">
+                            ID: ${doc.id}
+                            Số vé trước khi bán: ${data.ticketsBefore}
+                            Số vé sau khi bán: ${data.ticketsAfter}
+                            Số vé đã bán: ${data.ticketsSold}
+                            Tiền trước khi bán: $${data.moneyBefore}
+                            Tiền sau khi bán: $${data.moneyAfter}
+                            Tổng tiền: $${data.totalMoney}
+                            Thời gian nhập: ${data.timestamp}
+                        </div>
+                    </td>
                     <td>${data.location}</td>
                     <td>${data.date}</td>
                     <td>${data.time}</td>
                     <td>${sold}</td>
-                    <td>${profit}</td>
-                    <td>${donation}</td>
+                    <td>$${profit}</td>
+                    <td>$${donation}</td>
                     <td><button onclick="deleteReport('${doc.id}')">Xoá</button></td>
                 </tr>
                 `;
             });
 
-            document.getElementById('totalTickets').textContent = totalTickets;
-            document.getElementById('totalProfit').textContent = totalProfit;
-            document.getElementById('totalDonation').textContent = totalDonation;
+            document.getElementById('totalTickets').textContent = `${totalTickets}`;
+            document.getElementById('totalProfit').textContent = `${totalProfit}`;
+            document.getElementById('totalDonation').textContent = `${totalDonation}`;
 
-            
+
         }
 
         async function deleteReport(id) {
-            if (confirm("Bạn có chắc muốn xoá bản ghi này?")) 
+            if (confirm("Bạn có chắc muốn xoá bản ghi này?"))
                 db.collection("banve_records").doc(id).delete()
                     .then(() => {
                         console.log("Document deleted");
