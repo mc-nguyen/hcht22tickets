@@ -65,7 +65,7 @@
             });
         }
 
-        async function deleteLocation(id) {
+        function deleteLocation(id) {
             if (confirm('Bạn có chắc muốn xóa không?')) {
                 db.collection('churches').doc(id).delete()
                     .then(() => {
