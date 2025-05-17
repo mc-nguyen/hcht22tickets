@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Test Generate Report</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        input,
+        button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Test Tạo Báo Cáo Doanh Thu</h2>
+
+    <form id="testForm">
+        <label>Tên người bán:
+            <input type="text" id="sellerName" required />
+        </label>
+        <label>Nhà thờ:
+            <input type="text" id="location" required />
+        </label>
+        <label>Ngày:
+            <input type="date" id="date" required />
+        </label>
+        <label>Giờ:
+            <input type="time" id="time" required />
+        </label>
+        <label>Số vé trước:
+            <input type="number" id="ticketsBefore" required />
+        </label>
+        <label>Số vé sau:
+            <input type="number" id="ticketsAfter" required />
+        </label>
+        <label>Tiền mặt trước:
+            <input type="number" id="moneyBefore" required />
+        </label>
+        <label>Tiền mặt sau:
+            <input type="number" id="moneyAfter" required />
+        </label>
+        <button type="submit">Tạo báo cáo thủ công</button>
+        <button type="button" id="generateRandom">Tạo 10 record ngẫu nhiên</button>
+        <button type="button" id="deleteAll">🗑️ Xóa toàn bộ dữ liệu</button>
+    </form>
+
+    <p id="status"></p>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            query,
+            getDocs,
+            deleteDoc,
+            doc
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3O1M0nrrH4SQ4Sew9V0LZf2NBPGG2nOg",
+            authDomain: "banvehcht19.firebaseapp.com",
+            projectId: "banvehcht19",
+            storageBucket: "banvehcht19.appspot.com",
+            messagingSenderId: "771243862354",
+            appId: "1:771243862354:web:398af3230163696fa7f28b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById("testForm");
+        const status = document.getElementById("status");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const sellerName = document.getElementById("name").value;
+            const location = document.getElementById("location").value;
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+            const ticketsBefore = parseInt(document.getElementById("ticketsBefore").value);
+            const ticketsAfter = parseInt(document.getElementById("ticketsAfter").value);
+            const moneyBefore = parseFloat(document.getElementById("moneyBefore").value);
+            const moneyAfter = parseFloat(document.getElementById("moneyAfter").value);
+
+            const ticketsSold = ticketsBefore - ticketsAfter;
+            const totalProfit = ticketsSold * 30;
+            const donation = moneyAfter - moneyBefore - totalProfit;
+
+            try {
+                await addDoc(collection(db, "banve_records"), {
+                    sellerName,
+                    location,
+                    date,
+                    time,
+                    ticketsBefore,
+                    ticketsAfter,
+                    ticketsSold,
+                    moneyBefore,
+                    moneyAfter,
+                    totalProfit,
+                    donation,
+                    createdAt: new Date().toISOString()
+                });
+                status.textContent = "✅ Đã tạo báo cáo thủ công!";
+                form.reset();
+            } catch (error) {
+                status.textContent = "❌ Lỗi: " + error.message;
+            }
+        });
+
+        document.getElementById("generateRandom").addEventListener("click", async () => {
+            const sellers = ["Anna", "Bình", "Chi", "Dũng", "Emma"];
+            const churches = ["Giáo xứ A", "Giáo xứ B", "Giáo xứ C", "Giáo xứ D"];
+            const now = new Date();
+
+            for (let i = 0; i < 10; i++) {
+                const name = sellers[Math.floor(Math.random() * sellers.length)];
+                const location = churches[Math.floor(Math.random() * churches.length)];
+                const date = now.toISOString().split("T")[0];
+                const time = `${Math.floor(6 + Math.random() * 12)}:${Math.random() > 0.5 ? '00' : '30'}`;
+
+                const ticketsBefore = 50 + Math.floor(Math.random() * 50);
+                const ticketsSold = Math.floor(Math.random() * (ticketsBefore + 1));
+                const ticketsAfter = ticketsBefore - ticketsSold;
+
+                const ticketRevenue = ticketsSold * 30;
+                const moneyBefore = Math.floor(Math.random() * 100);
+                const donation = Math.floor(Math.random() * 100);
+                const moneyAfter = moneyBefore + ticketRevenue + donation;
+
+                await addDoc(collection(db, "banve_records"), {
+                    name: name,
+                    location: location,
+                    date: date,
+                    time: time,
+                    ticketsBefore: ticketsBefore,
+                    ticketsAfter: ticketsAfter,
+                    ticketsSold: ticketsSold,
+                    ticketRevenue: ticketRevenue,
+                    moneyBefore: moneyBefore,
+                    moneyAfter: moneyAfter,
+                    totalMoney: moneyAfter-moneyBefore,
+                    donation: donation,
+                    timestamp: new Date()
+                });
+            }
+
+            status.textContent = "✅ Đã tạo 10 record ngẫu nhiên!";
+        });
+
+        document.getElementById("deleteAll").addEventListener("click", async () => {
+            if (!confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu trong 'reports'?")) return;
+
+            try {
+                const q = query(collection(db, "banve_records"));
+                const snapshot = await getDocs(q);
+
+                const deletions = snapshot.docs.map((docSnap) => deleteDoc(doc(db, "banve_records", docSnap.id)));
+                await Promise.all(deletions);
+
+                status.textContent = `🗑️ Đã xóa ${snapshot.size} bản ghi thành công!`;
+            } catch (err) {
+                status.textContent = "❌ Lỗi khi xóa: " + err.message;
+            }
+        });
+    </script>
+</body>
+
+</html>
