@@ -67,7 +67,13 @@
 
         async function deleteLocation(id) {
             if (confirm('Bạn có chắc muốn xóa không?')) {
-                db.collection('churches').doc(id).delete();
+                db.collection('churches').doc(id).delete()
+                    .then(() => {
+                        console.log("Location deleted");
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting document: ", error);
+                    });;
                 loadLocations();
             }
         }
